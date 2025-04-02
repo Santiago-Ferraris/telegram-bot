@@ -1,0 +1,12 @@
+{
+    "services": [
+      {
+        "name": "connector-service",
+        "env": "node",
+        "buildCommand": "npm install",
+        "startCommand": "npm run dev",
+        "rootDir": "connector_service"
+      }
+    ]
+  }
+  
