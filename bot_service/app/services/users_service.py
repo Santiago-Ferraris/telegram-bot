@@ -1,22 +1,23 @@
+from typing import Optional
 from models.user import User
 from sqlalchemy.orm import Session
 
         
 
-def check_user(db: Session, telegram_id: str) -> bool:
-    """Checks if a user with the given telegram_id exists in the database.
+def get_user(db: Session, telegram_id: str) -> Optional[User]:
+    """Gets a user with the given telegram_id from the database.
     
     Args:
         db: Database session
         telegram_id: Telegram ID of the user to check
         
     Returns:
-        True if the user exists, False otherwise
+        User object if found, None otherwise
     """
     try:
         
         user = db.query(User).filter(User.telegram_id == telegram_id).first()
-        return user is not None
+        return user
     except Exception as e:
-        print(f"Error checking user in database: {str(e)}")
-        return False
+        print(f"Error retrieving user from database: {str(e)}")
+        return None

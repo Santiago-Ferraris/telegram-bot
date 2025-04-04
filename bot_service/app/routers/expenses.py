@@ -19,14 +19,16 @@ router = APIRouter(
 async def post_expense_from_message(message: dict, db: Session= Depends(get_db)):
     """Processes a message with AI and inserts it into the DB if it's an expense."""
     text_message = message.get("text", "").strip()
-    user_id = message.get("user_id")
+    user_telegram_id = message.get("user_id")
     thread_id = uuid.uuid4()
 
-    if not text_message or not user_id:
+    if not text_message or not user_telegram_id:
         raise HTTPException(status_code=400, detail="Message text and user_id are required")
     # Check if user exists in the database
 
-    if not users_service.check_user(db, str(user_id)):
+    user = users_service.get_user(db, str(user_telegram_id))
+
+    if not user:
         raise HTTPException(
             status_code=403, 
             detail="Not enough permissions. User is not on the whitelist."
@@ -39,14 +41,14 @@ async def post_expense_from_message(message: dict, db: Session= Depends(get_db))
     
     if expense_related.expense_category == ExpenseRelatedCategory.ADD_EXPENSE:
         # Step 2: Extract structured expense data
-        expense_data = llm_service.extract_expense_details(text_message, user_id, datetime.now().isoformat(), langsmith_extra={"metadata": {"thread_id": thread_id}})
+        expense_data = llm_service.extract_expense_details(text_message, user_telegram_id, datetime.now().isoformat(), langsmith_extra={"metadata": {"thread_id": thread_id}})
 
         # Step 3: Insert into database
         expenses_service.insert_expense_to_db(expense_data, db)
 
         return {"status": "Inserted into database", "expense": expense_data}
     elif expense_related.expense_category == ExpenseRelatedCategory.GET_EXPENSES:
-        expenses: List[Expense] = expenses_service.get_expenses(db, user_id=user_id)
+        expenses: List[Expense] = expenses_service.get_expenses(db, user_id=user.id)
 
         json_expenses = [expense._asdict() for expense in expenses]
 
