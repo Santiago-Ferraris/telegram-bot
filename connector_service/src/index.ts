@@ -20,6 +20,7 @@ interface TelegramMessage {
 
 // Webhook endpoint to receive Telegram messages
 const webhookHandler: RequestHandler = async (req, res) => {
+  console.log(req)
   const body: TelegramMessage = req.body;
 
   console.log(body);
