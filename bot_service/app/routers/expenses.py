@@ -1,7 +1,7 @@
 from typing import List
 from models.expense import Expense
 from database.db_config import get_db
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 import uuid
 from sqlalchemy.orm import Session
 from datetime import datetime
@@ -30,14 +30,17 @@ async def post_expense_from_message(message: dict, db: Session= Depends(get_db))
 
     if not user:
         raise HTTPException(
-            status_code=403, 
+            status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions. User is not on the whitelist."
         )
 
     # Step 1: Determine if message is expense-related
     expense_related: IsExpenseRelatedSchema = llm_service.is_expense_related(text_message, langsmith_extra={"metadata": {"thread_id": thread_id}})
     if not expense_related.is_expense_related:
-        return {"status": "Not expense-related"}
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Message is not expense-related."
+        )
     
     if expense_related.expense_category == ExpenseRelatedCategory.ADD_EXPENSE:
         # Step 2: Extract structured expense data
@@ -46,7 +49,7 @@ async def post_expense_from_message(message: dict, db: Session= Depends(get_db))
         # Step 3: Insert into database
         expenses_service.insert_expense_to_db(expense_data, db)
 
-        return {"status": "Inserted into database", "expense": expense_data}
+        return {"message": f"{expense_data.category} expense added ✅"}
     elif expense_related.expense_category == ExpenseRelatedCategory.GET_EXPENSES:
         expenses: List[Expense] = expenses_service.get_expenses(db, user_id=user.id)
 
@@ -54,6 +57,9 @@ async def post_expense_from_message(message: dict, db: Session= Depends(get_db))
 
         expense_analysis = llm_service.analyze_expenses(text_message, datetime.now().isoformat(), json_expenses ,langsmith_extra={"metadata": {"thread_id": thread_id}})
 
-        return {"status": expense_analysis}
+        return {"message": expense_analysis}
     else:
-        return {"status": f"Category not implemented"}
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Category not implemented."
+        )

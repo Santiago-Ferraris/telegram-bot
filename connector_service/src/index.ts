@@ -48,7 +48,7 @@ const webhookHandler: RequestHandler = async (req, res) => {
     // Send response back to the user with the status from bot service
     await axios.post(`${TELEGRAM_API_URL}/sendMessage`, {
       chat_id: chatId,
-      text: botServiceResponse.data.status
+      text: botServiceResponse.data.message
     });
   } catch (error: any) {
     console.error("Error:", error.response?.data || error.message);
