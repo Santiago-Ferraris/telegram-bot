@@ -6,6 +6,13 @@
         "buildCommand": "npm install",
         "startCommand": "npm run dev",
         "rootDir": "connector_service"
+      },
+      {
+        "name": "bot-service",
+        "env": "python",
+        "buildCommand": "echo 'Skipping build for bot_service'",
+        "startCommand": "echo 'Skipping start for bot_service'",
+        "rootDir": "bot_service"
       }
     ]
   }
