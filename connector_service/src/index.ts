@@ -21,6 +21,8 @@ interface TelegramMessage {
 const webhookHandler: RequestHandler = async (req, res) => {
   const body: TelegramMessage = req.body;
 
+  console.log(body)
+
   if (!body.message || !body.message.text) {
     res.sendStatus(400);
     return;
@@ -35,7 +37,7 @@ const webhookHandler: RequestHandler = async (req, res) => {
   try {
     await axios.post(`${TELEGRAM_API_URL}/sendMessage`, {
       chat_id: chatId,
-      text: `You said: ${text}`,
+      text: `You said: ${JSON.stringify(req)}`,
     });
   } catch (error: any) {
     console.error("Error sending message:", error.response?.data || error.message);
