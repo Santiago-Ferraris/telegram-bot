@@ -19,7 +19,7 @@ def is_expense_related(text_message: str) -> IsExpenseRelatedSchema:
                 "content": (
                     "You are a text message evaluator"
                     "Determine if the content of the message is expense related, and its category "
-                    "For a message to be expense related, it needs to make reference to an expense"
+                    "For a message to be expense related, it needs to make reference to an expense or a synonym (e.g. expense, spend, spent, etc)"
                     "The output should be a boolean indicating true if the message is expense related, and false if not, and a category"
                     "If it is NOT expense related, the category should be None, if it IS expense related, you should identify the correct category"
                 ),
@@ -61,7 +61,7 @@ def extract_expense_details(text_message: str, user_id: str, timestamp: datetime
     return expense
 
 @traceable(run_type="llm")
-def analyze_expenses(text_message: str, user_id: str, timestamp: datetime, expense_list: list) -> dict:
+def analyze_expenses(text_message: str, timestamp: datetime, expense_list: list) -> dict:
     """Extracts expense details from a message using OpenAI."""
     response = client.beta.chat.completions.parse(
         model="gpt-4o-mini",
@@ -70,14 +70,15 @@ def analyze_expenses(text_message: str, user_id: str, timestamp: datetime, expen
                 "role": "system",
                 "content": (
                     "You are an expense list analyzer"
-                    "You will receive a Message, a User ID, a current Timesamp, and an Expense List."
+                    "You will receive a Message, a current Timesamp, and an Expense List."
                     "Determine the objective stated in the content of the message"
                     "To create the answer, analyze the provided list of expenses"
                     "Your answer should be an analysis that replies to the objective stated in the message"
                     "Your answer SHOULD BE DIRECTED to the user"
+                    "Your answer SHOULD be formatted in Markdown"
                 )
             },
-            {"role": "user", "content": f"Message: {text_message}, User ID: {user_id}, Timestamp: {timestamp}, Expense List: {expense_list}"}
+            {"role": "user", "content": f"Message: {text_message}, Timestamp: {timestamp}, Expense List: {expense_list}"}
         ],
         response_format=ExpenseAnalysisSchema
     )

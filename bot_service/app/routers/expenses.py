@@ -43,8 +43,8 @@ async def post_expense_from_message(message: dict, db: Session= Depends(get_db))
 
         json_expenses = [expense._asdict() for expense in expenses]
 
-        expense_analysis = llm_service.analyze_expenses(text_message, user_id, datetime.now().isoformat(), json_expenses ,langsmith_extra={"metadata": {"thread_id": thread_id}})
+        expense_analysis = llm_service.analyze_expenses(text_message, datetime.now().isoformat(), json_expenses ,langsmith_extra={"metadata": {"thread_id": thread_id}})
 
-        return {"status": "Expenses Analyzed", "analysis": expense_analysis}
+        return {"status": expense_analysis}
     else:
         return {"status": f"Category not implemented"}

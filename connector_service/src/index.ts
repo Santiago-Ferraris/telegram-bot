@@ -9,6 +9,7 @@ app.use(express.json());
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_API_URL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
+const BOT_SERVICE_URL = process.env.BOT_SERVICE_URL;
 
 interface TelegramMessage {
   message?: {
@@ -21,7 +22,7 @@ interface TelegramMessage {
 const webhookHandler: RequestHandler = async (req, res) => {
   const body: TelegramMessage = req.body;
 
-  console.log(body)
+  console.log(body);
 
   if (!body.message || !body.message.text) {
     res.sendStatus(400);
@@ -33,14 +34,24 @@ const webhookHandler: RequestHandler = async (req, res) => {
 
   console.log(`Received message: ${text}`);
 
-  // Send the same message back to the user
   try {
+    // Send message to bot service
+    const botServiceResponse = await axios.post(BOT_SERVICE_URL!, {
+      text: text,
+      user_id: 1 // Hardcoded user_id as per instructions
+    });
+    
+    // Log the response from bot service
+    console.log("Bot service response:", botServiceResponse.data);
+    
+    // Send response back to the user with the status from bot service
     await axios.post(`${TELEGRAM_API_URL}/sendMessage`, {
       chat_id: chatId,
-      text: `You said: ${JSON.stringify(req)}`,
+      text: botServiceResponse.data.status,
+      parse_mode: "Markdown" // Alternative way to format messages in Telegram
     });
   } catch (error: any) {
-    console.error("Error sending message:", error.response?.data || error.message);
+    console.error("Error:", error.response?.data || error.message);
   }
 
   res.sendStatus(200);
