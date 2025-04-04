@@ -41,7 +41,7 @@ async def post_expense_from_message(message: dict, db: Session= Depends(get_db))
     
     if expense_related.expense_category == ExpenseRelatedCategory.ADD_EXPENSE:
         # Step 2: Extract structured expense data
-        expense_data = llm_service.extract_expense_details(text_message, user_telegram_id, datetime.now().isoformat(), langsmith_extra={"metadata": {"thread_id": thread_id}})
+        expense_data = llm_service.extract_expense_details(text_message, user.id, datetime.now().isoformat(), langsmith_extra={"metadata": {"thread_id": thread_id}})
 
         # Step 3: Insert into database
         expenses_service.insert_expense_to_db(expense_data, db)
