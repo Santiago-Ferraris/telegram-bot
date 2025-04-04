@@ -49,7 +49,7 @@ async def post_expense_from_message(message: dict, db: Session= Depends(get_db))
         # Step 3: Insert into database
         expenses_service.insert_expense_to_db(expense_data, db)
 
-        return {"message": f"{expense_data.category} expense added ✅"}
+        return {"message": f"{expense_data.category.value} expense added ✅"}
     elif expense_related.expense_category == ExpenseRelatedCategory.GET_EXPENSES:
         expenses: List[Expense] = expenses_service.get_expenses(db, user_id=user.id)
 
