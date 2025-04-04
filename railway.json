@@ -5,14 +5,7 @@
         "env": "node",
         "buildCommand": "npm install",
         "startCommand": "npm run dev",
-        "rootDir": "connector_service"
-      },
-      {
-        "name": "bot-service",
-        "env": "python",
-        "buildCommand": "pip install -r requirements.txt",
-        "startCommand": "uvicorn main:app",
-        "rootDir": "bot_service"
+        "root": "connector_service"
       }
     ]
   }
