@@ -10,8 +10,8 @@
       {
         "name": "bot-service",
         "env": "python",
-        "buildCommand": "echo 'Skipping build for bot_service'",
-        "startCommand": "echo 'Skipping start for bot_service'",
+        "buildCommand": "pip install -r requirements.txt",
+        "startCommand": "uvicorn main:app",
         "rootDir": "bot_service"
       }
     ]
