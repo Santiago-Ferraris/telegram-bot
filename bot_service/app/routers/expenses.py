@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 import uuid
 from sqlalchemy.orm import Session
 from datetime import datetime
-from app.services import expenses_service, llm_service
+from app.services import expenses_service, llm_service, users_service
 from models.expense_related import IsExpenseRelatedSchema, ExpenseRelatedCategory
 
 prefix = "expenses"
@@ -24,6 +24,13 @@ async def post_expense_from_message(message: dict, db: Session= Depends(get_db))
 
     if not text_message or not user_id:
         raise HTTPException(status_code=400, detail="Message text and user_id are required")
+    # Check if user exists in the database
+
+    if not users_service.check_user(db, str(user_id)):
+        raise HTTPException(
+            status_code=403, 
+            detail="Not enough permissions. User is not on the whitelist."
+        )
 
     # Step 1: Determine if message is expense-related
     expense_related: IsExpenseRelatedSchema = llm_service.is_expense_related(text_message, langsmith_extra={"metadata": {"thread_id": thread_id}})

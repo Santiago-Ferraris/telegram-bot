@@ -38,7 +38,7 @@ const webhookHandler: RequestHandler = async (req, res) => {
     // Send message to bot service
     const botServiceResponse = await axios.post(BOT_SERVICE_URL!, {
       text: text,
-      user_id: 1 // Hardcoded user_id as per instructions
+      user_id: chatId
     });
     
     // Log the response from bot service
@@ -47,11 +47,16 @@ const webhookHandler: RequestHandler = async (req, res) => {
     // Send response back to the user with the status from bot service
     await axios.post(`${TELEGRAM_API_URL}/sendMessage`, {
       chat_id: chatId,
-      text: botServiceResponse.data.status,
-      parse_mode: "Markdown" // Alternative way to format messages in Telegram
+      text: botServiceResponse.data.status
     });
   } catch (error: any) {
     console.error("Error:", error.response?.data || error.message);
+    
+    // If the error is a 403 (unauthorized), ignore the message
+    if (error.response?.status === 403) {
+      console.log(`Unauthorized user (${chatId}) attempted to use the service`);
+      // Don't send any response back to the user
+    }
   }
 
   res.sendStatus(200);

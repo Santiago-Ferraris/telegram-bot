@@ -18,10 +18,10 @@ def is_expense_related(text_message: str) -> IsExpenseRelatedSchema:
                 "role": "system",
                 "content": (
                     "You are a text message evaluator"
-                    "Determine if the content of the message is expense related, and its category "
-                    "For a message to be expense related, it needs to make reference to an expense or a synonym (e.g. expense, spend, spent, etc)"
-                    "The output should be a boolean indicating true if the message is expense related, and false if not, and a category"
-                    "If it is NOT expense related, the category should be None, if it IS expense related, you should identify the correct category"
+                    "Determine if the content of the message IS expense related, and its category, or if it IS NOT"
+                    "For a message to be expense related, EITHER OF TWO THINGS need to happen"
+                    "1. The message has both a price and a description (Assume prices are always dollars.). In this case, it is ADD category"
+                    "2. The message is asking some type of a conclusion taking into account their previous spendings. In this case, it is GET category"
                 ),
             },
             {"role": "user", "content": f"Message: {text_message}"}
@@ -75,7 +75,7 @@ def analyze_expenses(text_message: str, timestamp: datetime, expense_list: list)
                     "To create the answer, analyze the provided list of expenses"
                     "Your answer should be an analysis that replies to the objective stated in the message"
                     "Your answer SHOULD BE DIRECTED to the user"
-                    "Your answer SHOULD be formatted in Markdown"
+                    "Your answer SHOULD be text. Text-altering symbols like ** or # do NOT work."
                 )
             },
             {"role": "user", "content": f"Message: {text_message}, Timestamp: {timestamp}, Expense List: {expense_list}"}
